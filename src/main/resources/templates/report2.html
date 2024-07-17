@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Report 2</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 50%;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .back-home {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+<h2>Columns with Task Counts</h2>
+<table>
+    <thead>
+
+    <tr>
+        <th>Column Name</th>
+        <th>Task Count</th>
+    </tr>
+    </thead>
+
+
+    <tbody>
+    <tr th:each="column : ${columns}">
+        <td th:text="${column.name}"></td>
+        <td th:text="${#lists.size(column.tasks)}"></td>
+    </tr>
+    </tbody>
+</table>
+<!-- Back to Home Button -->
+<div class="back-home">
+
+    <a href="/">Back to Home</a>
+</div>
+</body>
+</html>

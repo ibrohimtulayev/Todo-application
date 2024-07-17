@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Tasks</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .back-home {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+<h2>User Tasks</h2>
+<table>
+    <thead>
+    <tr>
+        <th>Username</th>
+        <th>Overdue Tasks</th>
+        <th>Successful Tasks</th>
+        <th>All Tasks</th>
+    </tr>
+    </thead>
+    <tbody>
+    <!-- Loop through users and display tasks -->
+    <tr th:each="user : ${users}">
+        <td th:text="${user.username}"></td>
+        <td th:text="${user.overdueTasks}"></td>
+        <td th:text="${user.successfulTasks}"></td>
+        <td th:text="${user.allTasks}"></td>
+    </tr>
+    </tbody>
+</table>
+<!-- Back Home Button -->
+<div class="back-home">
+    <a href="/">Back Home</a>
+</div>
+</body>
+</html>

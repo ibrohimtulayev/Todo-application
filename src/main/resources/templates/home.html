@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Task Manager</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .container {
+            margin-left: 0; /* Remove the left margin */
+            padding-left: 0; /* Remove the left padding */
+        }
+        .card {
+            margin-bottom: 20px;
+            border: 1px solid #dee2e6;
+            border-radius: 0;
+            background-color: #f8f9fa; /* Light gray background */
+        }
+        .card-header {
+            background-color: #007bff; /* Blue header background */
+            color: #fff;
+            font-weight: bold;
+        }
+        .task {
+            border-bottom: 1px solid #656769;
+            padding: 10px 0;
+            background-color: #fff; /* White background for tasks */
+        }
+        .task.overdue {
+            border-bottom: 2px solid red; /* Red border for overdue tasks */
+        }
+        .btn-left:focus {
+            color: #cb0b4e !important; /* Red arrow on focus */
+        }
+        .btn-right:focus {
+            color: #a79c28 !important; /* Yellow arrow on focus */
+        }
+        .btn-add-task {
+            background-color: #28a745; /* Green button for Add Task */
+            border: none;
+        }
+        .btn-add-task:hover {
+            background-color: #218838; /* Darker green on hover */
+        }
+        .user-avatar {
+            margin-right: 5px; /* Adjust margin as needed */
+        }
+        .completed-on-time {
+            color: green; /* Green text for tasks completed on time */
+        }
+        .not-completed-on-time {
+            color: red; /* Red text for tasks not completed on time */
+        }
+        .delete-logo {
+            position: absolute;
+            top: 0;
+            right: 0;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <h1 class="mb-4 text-center" style="color: #007bff;">Task Manager</h1>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto"></ul>
+            <ul class="navbar-nav ml-auto">
+                <!-- My Tasks button -->
+                <li class="nav-item">
+                    <a class="nav-link btn btn-primary text-white" href="/?showMyTasks=false">All Tasks</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link btn btn-info text-white" href="/?showMyTasks=true">My Tasks</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link btn btn-danger text-white" href="/report1">Report 1</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link btn btn-success text-white" href="/report2">Report 2</a>
+                </li>
+                <li class="nav-item" sec:authorize="isAnonymous()">
+                    <a class="nav-link" th:href="@{/login}">Login</a>
+                </li>
+                <li class="nav-item" sec:authorize="isAnonymous()">
+                    <a class="nav-link" th:href="@{/registration}">Register</a>
+                </li>
+                <li class="nav-item" sec:authorize="isAuthenticated()">
+                    <a class="nav-link" href="/user">User</a>
+                </li>
+                <li class="nav-item" sec:authorize="isAuthenticated()">
+                    <a class="nav-link" th:href="@{/logout}">Logout</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container-fluid mt-4"> <!-- Use container-fluid for full width -->
+    <div class="row">
+        <!-- Loop through columns and display each as a card -->
+        <div class="col-md-2" th:each="column : ${columns}">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title" th:text="${column.name}"></h5>
+                </div>
+                <div class="card-body">
+                    <div class="tasks">
+                        <div th:each="task : ${tasks}" th:if="${task.column.id.equals(column.id)}" th:classappend="${task.isOverDue()} ? 'overdue' : ''" class="task">
+                            <span th:text="${task.name}"></span>
+                            <a th:href="@{'/tasks/edit/' + ${task.id}}"><button>✏️</button></a>
+                            <a th:href="@{'/tasks/delete/' + ${task.id}}"><button>🗑️</button></a>
+                            <div>
+                                <span th:text="'🗨️: ' + ${task.comments.size()}"></span>
+                                <span th:text="'⌚: ' + ${#temporals.format(task.deadLine, 'd MMMM')}"></span>
+                                <span th:if="${task.column.name == 'Completed'}" th:classappend="${task.checkIfCompletedOnTime()} ? 'completed-on-time' : 'not-completed-on-time'" th:text="'Completed on: ' + ${#temporals.format(task.finishDate, 'd MMMM')}"></span>
+                                <span th:if="${task.isOverDue()}" th:text="'Overdue'"></span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <div th:each="user : ${task.users}" class="user-avatar">
+                                    <img th:src="${user.avatar}" alt="User Avatar" class="img-thumbnail" style="width: 40px; height: 40px;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <form th:action="@{/tasks/add}" method="post">
+                        <input type="hidden" name="columnId" th:value="${column.id}">
+                        <div class="form-group">
+                            <input type="text" class="form-control" name="taskName" placeholder="Add Task">
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block btn-add-task">Add Task</button>
+                        <br>
+                        <div class="d-flex justify-content-between">
+
+                            <!-- Left button: Show only if column orderNumber is not the smallest -->
+                            <a th:if="${column.orderNumber != smallest}" th:href="@{'/columns/changeB/' + ${column.orderNumber}}">
+                                <button type="button" class="btn btn-sm btn-outline-primary btn-left"><<<</button>
+                            </a>
+                            <!-- Right button: Show only if column orderNumber is not the greatest -->
+                            <a th:if="${column.orderNumber != greatest}" th:href="@{'/columns/changeF/' + ${column.orderNumber}}">
+                                <button type="button" class="btn btn-sm btn-outline-primary btn-right">>>></button>
+                            </a>
+                        </div>
+                    </form>
+                    <!-- Move delete button here -->
+                    <a th:if="${column.orderNumber == greatest}" th:href="@{'/columns/delete/' + ${column.id}}">
+                        <button class="delete-logo">❌</button>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Column for adding a new column -->
+        <div class="col-md-2">
+            <div class="card">
+                <div class="card-body">
+                    <form th:action="@{/columns/add}" method="post">
+                        <div class="form-group">
+                            <label for="columnName">Column Name</label>
+                            <input type="text" class="form-control" id="columnName" name="name" placeholder="Enter column name">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Add</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

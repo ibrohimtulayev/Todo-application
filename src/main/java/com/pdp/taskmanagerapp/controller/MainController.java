@@ -87,5 +87,7 @@ public class MainController {
                 .build());
 
         return "redirect:/";
+
+
     }
 }

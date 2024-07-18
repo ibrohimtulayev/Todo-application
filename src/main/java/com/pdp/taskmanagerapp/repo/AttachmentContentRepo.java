@@ -11,4 +11,7 @@ import java.util.UUID;
 public interface AttachmentContentRepo extends JpaRepository<AttachmentContent, UUID> {
     @Transactional
     void deleteByAttachment(Attachment attachment);
+
+    AttachmentContent findById(Integer id);
+
 }
